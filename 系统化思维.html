@@ -309,9 +309,58 @@
             font-size: 1.0rem;
             line-height: 1.6;
         }
+        
+        /* --- 9. (NEW) 布局：流程卡片 (Flow-Steps) --- */
+        .flow-steps-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            list-style: none;
+            padding: 0;
+            margin: 0 -10px; /* 抵消卡片的外边距 */
+        }
+        .flow-step {
+            position: relative;
+            background: rgba(20, 30, 60, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 10px; /* 卡片间距 */
+            flex-basis: 300px; /* 基础宽度 */
+            flex-grow: 1;
+            max-width: 450px; /* 最大宽度 */
+            display: flex;
+            align-items: center;
+            min-height: 60px;
+            font-size: 1.0rem;
+            line-height: 1.6;
+        }
+        /* 箭头 */
+        .flow-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            top: 50%;
+            right: -32px; /* 放在外边距之外 */
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            color: #00f2a1;
+            opacity: 0.4;
+        }
+        /* 针对换行时的最后一个元素（视觉上） */
+        /* 这是一个简单的处理，在flex-wrap中很难完美，但这能覆盖大多数情况 */
+        @media (min-width: 900px) {
+            .flow-step:nth-child(2n)::after { /* 假设一行2个 */
+                 /* content: '...'; */
+            }
+        }
+         @media (min-width: 1200px) {
+            .flow-step:nth-child(3n)::after { /* 假设一行3个 */
+                 /* content: '...'; */
+            }
+        }
 
 
-        /* --- 9. UI 控件 (导航、全屏、页码) --- */
+        /* --- 10. UI 控件 (导航、全屏、页码) --- */
         .ppt-ui {
             position: fixed;
             z-index: 10;
@@ -352,7 +401,7 @@
             font-weight: 300;
         }
 
-        /* --- 10. 辅助样式 --- */
+        /* --- 11. 辅助样式 --- */
         .text-accent { color: #00f2a1; }
         .text-danger { color: #ff4d4d; font-weight: bold; }
         .text-success { color: #00f2a1; font-weight: bold; }
@@ -545,28 +594,17 @@ A做完 → 交给B → B做完 → 交给C
             <section class="slide">
                 <div class="content-wrapper">
                     <h1 class="slide-title">案例1：缺失的环节 (红色标注)</h1>
-                    <div class="multi-card-container">
-                        <div class="glass-card">
-                            <div class="card-content">
-                                <ol style="font-size: 1.0rem; line-height: 1.6;">
-                                    <li>触发：代码提交</li>
-                                    <li>审核：AI自动检测</li>
-                                    <li class="text-danger">🔴 反馈：问题通知到开发者 (钉钉/Git)</li>
-                                    <li class="text-danger">🔴 卡点：有问题不能合并 (Git Hook)</li>
-                                </ol>
-                            </div>
-                        </div>
-                        <div class="glass-card">
-                             <div class="card-content">
-                                <ol start="5" style="font-size: 1.0rem; line-height: 1.6;">
-                                    <li class="text-danger">🔴 追踪：修改进度可视化 (看板)</li>
-                                    <li>验证：修改后重新审核</li>
-                                    <li class="text-danger">🔴 度量：问题修复率纳入绩效</li>
-                                    <li>关闭：代码质量达标才能上线</li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div> </div> </section>
+                    <ul class="flow-steps-container">
+                        <li class="flow-step">1. 触发：代码提交</li>
+                        <li class="flow-step">2. 审核：AI自动检测</li>
+                        <li class="flow-step"><span class="text-danger">3. 🔴 反馈：问题通知到开发者</span></li>
+                        <li class="flow-step"><span class="text-danger">4. 🔴 卡点：有问题不能合并</span></li>
+                        <li class="flow-step"><span class="text-danger">5. 🔴 追踪：修改进度可视化</span></li>
+                        <li class="flow-step">6. 验证：修改后重新审核</li>
+                        <li class="flow-step"><span class="text-danger">7. 🔴 度量：问题修复率纳入绩效</span></li>
+                        <li class="flow-step">8. 关闭：代码质量达标才能上线</li>
+                    </ul>
+                </div> </section>
             
             <section class="slide">
                 <div class="content-wrapper">
@@ -617,28 +655,17 @@ A做完 → 交给B → B做完 → 交给C
             <section class="slide">
                  <div class="content-wrapper">
                     <h1 class="slide-title">案例2：缺失的环节 (红色标注)</h1>
-                    <div class="multi-card-container">
-                        <div class="glass-card">
-                            <div class="card-content">
-                                <ol style="font-size: 1.0rem; line-height: 1.6;">
-                                    <li class="text-danger">🔴 需求洞察：谁需要？解决什么问题？</li>
-                                    <li class="text-danger">🔴 用户验证：原型测试、需求确认</li>
-                                    <li>技术研发：开发功能</li>
-                                    <li class="text-danger">🔴 使用场景设计：如何融入现有流程？</li>
-                                </ol>
-                            </div>
-                        </div>
-                        <div class="glass-card">
-                             <div class="card-content">
-                                <ol start="5" style="font-size: 1.0rem; line-height: 1.6;">
-                                    <li class="text-danger">🔴 推广计划：培训、文档、上手指南</li>
-                                    <li class="text-danger">🔴 使用追踪：用户使用数据监控</li>
-                                    <li class="text-danger">🔴 反馈迭代：收集问题持续改进</li>
-                                    <li class="text-danger">🔴 价值评估：是否真正解决问题？</li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div> </div> </section>
+                    <ul class="flow-steps-container">
+                        <li class="flow-step"><span class="text-danger">1. 🔴 需求洞察：谁需要？</span></li>
+                        <li class="flow-step"><span class="text-danger">2. 🔴 用户验证：原型测试</span></li>
+                        <li class="flow-step">3. 技术研发：开发功能</li>
+                        <li class="flow-step"><span class="text-danger">4. 🔴 使用场景设计</span></li>
+                        <li class="flow-step"><span class="text-danger">5. 🔴 推广计划：培训、文档</span></li>
+                        <li class="flow-step"><span class="text-danger">6. 🔴 使用追踪：数据监控</span></li>
+                        <li class="flow-step"><span class="text-danger">7. 🔴 反馈迭代：收集问题</span></li>
+                        <li class="flow-step"><span class="text-danger">8. 🔴 价值评估：是否解决问题？</span></li>
+                    </ul>
+                </div> </section>
             
             <section class="slide">
                 <div class="content-wrapper">
@@ -690,36 +717,19 @@ A做完 → 交给B → B做完 → 交给C
             <section class="slide">
                  <div class="content-wrapper">
                     <h1 class="slide-title">案例3：缺失的环节 (红色标注)</h1>
-                    <div class="multi-card-container">
-                        <div class="glass-card">
-                            <div class="card-content">
-                                <ol style="font-size: 1.0rem; line-height: 1.6;">
-                                    <li>需求确认：客户要什么支付方式？</li>
-                                    <li>账号准备：客户提供正确账号</li>
-                                    <li class="text-danger">🔴 信息核验：二次确认账号信息</li>
-                                    <li>配置操作：系统中填写配置</li>
-                                </ol>
-                            </div>
-                        </div>
-                        <div class="glass-card">
-                             <div class="card-content">
-                                <ol start="5" style="font-size: 1.0rem; line-height: 1.6;">
-                                    <li class="text-danger">🔴 配置复核：另一人检查配置</li>
-                                    <li class="text-danger">🔴 小额测试：1元测试支付流程</li>
-                                    <li class="text-danger">🔴 结果验证：确认资金到正确账号</li>
-                                </ol>
-                            </div>
-                        </div>
-                         <div class="glass-card">
-                             <div class="card-content">
-                                <ol start="8" style="font-size: 1.0rem; line-height: 1.6;">
-                                    <li class="text-danger">🔴 客户确认：客户签字确认测试通过</li>
-                                    <li>正式上线</li>
-                                    <li class="text-danger">🔴 上线后监控：首笔交易人工核验</li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div> </div> </section>
+                    <ul class="flow-steps-container">
+                        <li class="flow-step">1. 需求确认</li>
+                        <li class="flow-step">2. 账号准备</li>
+                        <li class="flow-step"><span class="text-danger">3. 🔴 信息核验：二次确认</span></li>
+                        <li class="flow-step">4. 配置操作</li>
+                        <li class="flow-step"><span class="text-danger">5. 🔴 配置复核：另一人检查</span></li>
+                        <li class="flow-step"><span class="text-danger">6. 🔴 小额测试：1元测试</span></li>
+                        <li class="flow-step"><span class="text-danger">7. 🔴 结果验证：确认到账</span></li>
+                        <li class="flow-step"><span class="text-danger">8. 🔴 客户确认：签字通过</span></li>
+                        <li class="flow-step">9. 正式上线</li>
+                        <li class="flow-step"><span class="text-danger">10. 🔴 上线后监控：首笔核验</span></li>
+                    </ul>
+                </div> </section>
             
             <section class="slide">
                 <div class="content-wrapper">
