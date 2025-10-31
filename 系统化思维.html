@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI时代的系统化思维：从功能到闭环</title>
+    
+    <style>
+        /* --- 1. 全局与基础设置 --- */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #050a1b;
+            color: #f0f0f0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 0;
+            margin-bottom: 0.75em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        h1 { font-size: 2.5rem; color: #00f2a1; }
+        h2 { font-size: 1.75rem; color: #f0f0f0; opacity: 0.9; }
+        h3 { font-size: 1.4rem; color: #00f2a1; }
+        h4 { font-size: 1.2rem; }
+        p, li { font-size: 1.1rem; line-height: 1.7; opacity: 0.9; }
+        a { color: #00f2a1; }
+        
+        ul, ol {
+            padding-left: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: rgba(20, 30, 60, 0.8);
+            color: #00f2a1;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- 2. PPT 核心布局与幻灯片 --- */
+        #ppt-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 1;
+            
+            /* 关键布局：默认为 flex 居中 */
+            display: flex;
+            align-items: center; /* 默认垂直居中 */
+            justify-content: center;
+            padding: 80px 120px; /* 为UI元素留出空间 */
+        }
+
+        /* 关键布局：当内容溢出时，切换到此状态 */
+        .slide.overflow {
+            align-items: flex-start; /* 顶部对齐 */
+            overflow-y: auto; /* 允许幻灯片滚动 */
+            padding-top: 100px; /* 滚动时顶部多留白 */
+            padding-bottom: 100px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 2;
+        }
+
+        /* 内容包装器，用于限制最大宽度 */
+        .content-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            z-index: 1; /* 确保在背景图之上 */
+        }
+
+        /* --- 3. 玻璃拟态卡片 (Glassmorphism) --- */
+        .glass-card {
+            background: rgba(20, 30, 60, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card-image-top {
+            width: 100%;
+            height: 300px; /* 固定高度 */
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-content {
+            padding: 24px 30px;
+        }
+
+        /* --- 4. 流程图/代码块 (横向滚动) --- */
+        .flow-chart-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto; /* 关键：实现横向滚动 */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 1em 0;
+        }
+
+        pre {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.95rem;
+            color: #f0f0f0;
+            white-space: pre; /* 保持格式 */
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        blockquote {
+            border-left: 4px solid #00f2a1;
+            padding-left: 1.5em;
+            margin: 1.5em 0;
+            font-size: 1.2rem;
+            font-style: italic;
+            background: rgba(0, 242, 161, 0.05);
+            padding-top: 1em;
+            padding-bottom: 1em;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* --- 5. 特殊页面：封面、章节、结尾 --- */
+        .slide.cover, .slide.chapter, .slide.end {
+            padding: 0;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 10, 27, 0.7); /* 深色蒙版 */
+            z-index: -1;
+        }
+
+        .cover h1, .chapter h1, .end h1 {
+            font-size: 4.5rem;
+            margin-bottom: 0.25em;
+            text-shadow: 0 0 20px rgba(0, 242, 161, 0.5);
+        }
+        .cover h2, .chapter h2, .end h2 {
+            font-size: 2.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+        .cover h3 {
+            font-size: 1.5rem;
+            color: #aaa;
+            margin-top: 20px;
+            font-weight: 400;
+        }
+
+        /* --- 6. 特殊页面：对比 (A vs B) --- */
+        .comparison-container {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+        }
+        .comparison-container .glass-card {
+            flex: 1;
+            min-width: 0;
+        }
+        /* "旧" 卡片 - 红色点缀 */
+        .comparison-container .card.old {
+            border-color: rgba(255, 77, 77, 0.5);
+        }
+        .comparison-container .card.old h3 {
+            color: #ff4d4d;
+            border-bottom: 1px solid rgba(255, 77, 77, 0.3);
+            padding-bottom: 10px;
+        }
+        /* "新" 卡片 - 绿色点缀 */
+        .comparison-container .card.new {
+            border-color: rgba(0, 242, 161, 0.5);
+        }
+        .comparison-container .card.new h3 {
+            color: #00f2a1;
+            border-bottom: 1px solid rgba(0, 242, 161, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .comparison-container li {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* --- 7. (NEW) 多卡片横向布局 --- */
+        .multi-card-container {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            align-items: stretch; /* 确保卡片等高 */
+        }
+        .multi-card-container .glass-card {
+            flex: 1; /* 均分空间 */
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .multi-card-container .card-content {
+            flex-grow: 1; /* 让内容区域占满卡片 */
+        }
+        /* 针对横向卡片内部的列表/字体做微调 */
+        .multi-card-container .card-content h3 {
+            font-size: 1.25rem;
+        }
+        .multi-card-container .card-content p,
+        .multi-card-container .card-content li {
+            font-size: 1.0rem;
+            line-height: 1.6;
+        }
+        .multi-card-container .card-content .checklist li {
+            margin-bottom: 10px;
+            padding-left: 30px;
+        }
+        .multi-card-container .card-content .checklist li::before {
+            top: 0;
+        }
+
+
+        /* --- 8. UI 控件 (导航、全屏、页码) --- */
+        .ppt-ui {
+            position: fixed;
+            z-index: 10;
+            color: #00f2a1;
+            font-size: 2rem;
+            cursor: pointer;
+            user-select: none;
+            opacity: 0.6;
+            transition: opacity 0.2s, text-shadow 0.2s;
+        }
+        .ppt-ui:hover {
+            opacity: 1;
+            text-shadow: 0 0 15px rgba(0, 242, 161, 0.7);
+        }
+
+        #prev-slide {
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        #next-slide {
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #fullscreen-toggle {
+            top: 25px;
+            right: 25px;
+            font-size: 1.8rem;
+        }
+
+        #pagination {
+            bottom: 25px;
+            right: 30px;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 300;
+        }
+
+        /* --- 9. 辅助样式 --- */
+        .text-accent { color: #00f2a1; }
+        .text-danger { color: #ff4d4d; font-weight: bold; }
+        .text-success { color: #00f2a1; font-weight: bold; }
+
+        /* 自定义清单样式 */
+        .checklist {
+            list-style: none;
+            padding-left: 10px;
+        }
+        .checklist li {
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 15px;
+        }
+        .checklist li::before {
+            content: '■'; /* □ */
+            position: absolute;
+            left: 0;
+            top: 2px;
+            color: #00f2a1;
+            font-size: 1.2rem;
+        }
+        .checklist li.checked::before {
+            content: '☑';
+        }
+        .checklist li.red-flag::before {
+            content: '■';
+            color: #ff4d4d;
+        }
+        
+        /* --- 10. 辅助样式：紧凑布局 (保留) --- */
+        /* 依然用于压缩字体，可与 multi-card 配合使用 */
+        .slide.compact-layout .card-content {
+            padding: 20px 24px;
+        }
+        .slide.compact-layout h1 {
+            font-size: 2.1rem;
+            margin-bottom: 0.5em;
+        }
+        .slide.compact-layout h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5em;
+        }
+        .slide.compact-layout p, 
+        .slide.compact-layout li,
+        .slide.compact-layout th,
+        .slide.compact-layout td {
+            font-size: 1.0rem;
+            line-height: 1.5;
+        }
+        .slide.compact-layout th,
+        .slide.compact-layout td {
+            padding: 8px 12px;
+        }
+        .slide.compact-layout blockquote {
+            margin: 1.0em 0;
+            padding-top: 0.75em;
+            padding-bottom: 0.75em;
+        }
+        .slide.compact-layout .checklist li {
+            margin-bottom: 10px;
+            padding-left: 30px;
+        }
+        .slide.compact-layout .checklist li::before {
+            top: 0;
+        }
+        .slide.compact-layout ul, 
+        .slide.compact-layout ol {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ppt-container">
+        
+        <div id="slide-deck">
+
+            <section class="slide cover active">
+                <img src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Cover Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>AI时代的系统化思维</h1>
+                    <h2>从功能到闭环</h2>
+                    <h3>[您的姓名或公司] | [2025-10-31]</h3>
+                </div>
+            </section>
+
+            <section class="slide chapter">
+                <img src="https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Chapter 1 Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>第一部分</h1>
+                    <h2>问题诊断 - 我们缺了什么？</h2>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/450059/pexels-photo-450059.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Broken Link" class="card-image-top">
+                        <div class="card-content">
+                            <h1>开场冲击：三个真实的"断裂"</h1>
+                            <p>我们每天都在经历价值的“半路蒸发”：</p>
+                            <ul>
+                                <li><strong>AI代码审核</strong>：每天 <span class="text-accent">X</span> 个问题未修复，技术债持续累积。</li>
+                                <li><strong>AI新功能</strong>：<span class="text-accent">80%</span> 无人使用，<span class="text-accent">Y</span> 万研发成本浪费。</li>
+                                <li><strong>支付配置错配</strong>：客户投诉激增，带来 <span class="text-accent">Z</span> 级资金风险。</li>
+                            </ul>
+                            <div class="flow-chart-container">
+<pre>
+[功能开发] <span class="text-danger">---- ❌ ----</span> [实际使用]  (断裂)
+[AI审核]   <span class="text-danger">---- ❌ ----</span> [代码改进]  (断裂)
+[配置操作] <span class="text-danger">---- ❌ ----</span> [结果验证]  (断裂)
+</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="content-wrapper">
+                    <h1>共同病根："岗位思维"的陷阱</h1>
+                    <div class="comparison-container">
+                        <div class="glass-card card old">
+                            <div class="card-content">
+                                <h3><span class="text-danger">❌</span> 岗位思维 (旧)</h3>
+                                <ul>
+                                    <li>"我完成了我的部分"</li>
+                                    <li>"我做了功能就够了"</li>
+                                    <li>"后面不归我管"</li>
+                                </ul>
+                                <div class="flow-chart-container">
+<pre>
+A做完 → 交给B → B做完 → 交给C
+</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card card new">
+                            <div class="card-content">
+                                <h3><span class="text-success">✅</span> 闭环思维 (新)</h3>
+                                <ul>
+                                    <li>"我需要对最终价值负责"</li>
+                                    <li>"这个流程的终点在哪"</li>
+                                    <li>"如何确保价值交付？"</li>
+                                </ul>
+                                <div class="flow-chart-container">
+<pre>
+客户需求 → 完整路径 → 客户价值实现
+</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="AI Robot" class="card-image-top">
+                        <div class="card-content">
+                            <h1>AI自动化时代的新要求</h1>
+                            <h3>核心观点：AI不会自动补全你漏掉的环节</h3>
+                            <ul>
+                                <li>AI只能优化"已设计"的流程。</li>
+                                <li>在流程断裂处，AI反而会放大问题（例如：AI疯狂产出报告，但无人处理）。</li>
+                                <li>未来的核心岗位要求：<span class="text-accent">设计闭环 > 执行任务</span>。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide chapter">
+                <img src="https://images.pexels.com/photos/3401403/pexels-photo-3401403.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Chapter 2 Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>第二部分</h1>
+                    <h2>案例深度剖析</h2>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Coding" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例1：AI代码审核的"半拉子工程"</h1>
+                            <h3>问题场景还原：</h3>
+                            <div class="flow-chart-container">
+<pre>
+现状流程：
+开发代码 → AI审核 → 输出问题列表 → <span class="text-danger">[断裂]</span> → 无人修改 → 照样上线
+</pre>
+                            </div>
+                            <p class="text-danger">结果：AI工具的成本花了，但代码质量没有真正提升。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/577585/pexels-photo-577585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Flowchart" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例1：缺失的环节 (红色标注)</h1>
+                            <h3>完整的闭环应该是：</h3>
+                            <div class="flow-chart-container">
+<pre>
+1. 触发：代码提交
+2. 审核：AI自动检测
+<span class="text-danger">3. 🔴 反馈：问题通知到开发者 (钉钉/Git)</span>
+<span class="text-danger">4. 🔴 卡点：有问题不能合并 (Git Hook)</span>
+<span class="text-danger">5. 🔴 追踪：修改进度可视化 (看板)</span>
+6. 验证：修改后重新审核
+<span class="text-danger">7. 🔴 度量：问题修复率纳入绩效</span>
+8. 关闭：代码质量达标才能上线
+</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide compact-layout">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Analysis" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例1：系统化思维工具应用</h1>
+                            <h3>工具1：SIPOC分析</h3>
+                            <table>
+                                <thead><tr><th>维度</th><th>现状</th><th>应该是</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Supplier</td><td>AI审核系统</td><td class="text-success">✓</td></tr>
+                                    <tr><td>Input</td><td>代码</td><td class="text-success">✓</td></tr>
+                                    <tr><td>Process</td><td>检测问题</td><td class="text-success">✓</td></tr>
+                                    <tr><td>Output</td><td>问题报告</td><td class="text-danger">❌ 但没人用</td></tr>
+                                    <tr><td>Customer</td><td>开发者</td><td class="text-danger">❌ 未设计交付机制</td></tr>
+                                </tbody>
+                            </table>
+                            <h3 style="margin-top: 1em;">AI辅助改进方案：</h3>
+                            <ul>
+                                <li>用AI自动阻止合并（Git hook）</li>
+                                <li>AI生成修改建议的Issue，并@责任人</li>
+                                <li>AI追踪修复进度并自动提醒</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/265087/pexels-photo-265087.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Empty Office" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例2：AI研究院的"技术孤岛"</h1>
+                            <h3>问题场景还原：</h3>
+                            <div class="flow-chart-container">
+<pre>
+现状流程：
+研究技术 → 开发功能 → <span class="text-danger">[断裂]</span> → 无人知道 → 无人使用
+</pre>
+                            </div>
+                            <h2 class="text-danger">数据冲击：80%功能零使用 = 研发资源空转</h2>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="User Journey" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例2：缺失的环节</h1>
+                            <h3>完整闭环应该是：</h3>
+                            <ol>
+                                <li class="text-danger">🔴 需求洞察：谁需要？解决什么问题？</li>
+                                <li class="text-danger">🔴 用户验证：原型测试、需求确认</li>
+                                <li>技术研发：开发功能</li>
+                                <li class="text-danger">🔴 使用场景设计：如何融入现有流程？</li>
+                                <li class="text-danger">🔴 推广计划：培训、文档、上手指南</li>
+                                <li class="text-danger">🔴 使用追踪：用户使用数据监控</li>
+                                <li class="text-danger">🔴 反馈迭代：收集问题持续改进</li>
+                                <li class="text-danger">🔴 价值评估：是否真正解决问题？</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/1181438/pexels-photo-1181438.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Perspective" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例2：客户旅程地图（反面案例）</h1>
+                            <h3>研究院视角（技术导向）：</h3>
+                            <div class="flow-chart-container">
+<pre>
+研究 → 开发 → 发布 → <span class="text-danger">[结束]</span>
+</pre>
+                            </div>
+                            <h3>应有的用户视角（价值导向）：</h3>
+                            <div class="flow-chart-container">
+<pre>
+发现痛点 → 寻找解决方案 → 了解功能 → 学习使用 → 日常应用 → 
+遇到问题 → 获得支持 → 持续使用 → <span class="text-success">推荐他人</span>
+</pre>
+                            </div>
+                            <h3>AI辅助改进方案：</h3>
+                            <ul>
+                                <li>AI分析用户行为数据，识别真实需求</li>
+                                <li>AI生成个性化推荐："你可能需要这个功能"</li>
+                                <li>AI自动生成使用教程和FAQ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/6794921/pexels-photo-6794921.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Payment Error" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例3：支付配置的"致命疏忽"</h1>
+                            <h3>问题场景还原：</h3>
+                            <div class="flow-chart-container">
+<pre>
+现状流程：
+项目需求 → 配置支付 → <span class="text-danger">[断裂]</span> → 直接上线 → 客户资金错误
+</pre>
+                            </div>
+                            <h2 class="text-danger">风险：资金损失 + 客户信任崩塌</h2>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/4386467/pexels-photo-4386467.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Checklist" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例3：缺失的环节</h1>
+                            <h3>完整闭环应该是：</h3>
+                            <ol>
+                                <li>需求确认：客户要什么支付方式？</li>
+                                <li>账号准备：客户提供正确账号</li>
+                                <li class="text-danger">🔴 信息核验：二次确认账号信息</li>
+                                <li>配置操作：系统中填写配置</li>
+                                <li class="text-danger">🔴 配置复核：另一人检查配置</li>
+                                <li class="text-danger">🔴 小额测试：1元测试支付流程</li>
+                                <li class="text-danger">🔴 结果验证：确认资金到正确账号</li>
+                                <li class="text-danger">🔴 客户确认：客户签字确认测试通过</li>
+                                <li>正式上线</li>
+                                <li class="text-danger">🔴 上线后监控：首笔交易人工核验</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/3760067/pexels-photo-3760067.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Risk" class="card-image-top">
+                        <div class="card-content">
+                            <h1>案例3："如果-那么"思维练习</h1>
+                            <div class="flow-chart-container">
+<pre>
+<span class="text-danger">如果</span> 配错账号 → <span class="text-danger">那么</span> 资金去向错误
+    ↓
+<span class="text-danger">如果</span> 没有测试 → <span class="text-danger">那么</span> 上线才发现
+    ↓
+<span class="text-danger">如果</span> 客户不知情 → <span class="text-danger">那么</span> 投诉和纠纷
+    ↓  
+<span class="text-danger">如果</span> 没有监控 → <span class="text-danger">那么</span> 持续错误
+</pre>
+                            </div>
+                            <h3>验证点设计原则：</h3>
+                            <ul>
+                                <li class="text-success">✓ 高风险操作必有复核</li>
+                                <li class="text-success">✓ 涉及资金必有测试</li>
+                                <li class="text-success">✓ 配置变更必有确认</li>
+                                <li class="text-success">✓ 上线前必有验证</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide chapter">
+                <img src="https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Chapter 3 Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>第三部分</h1>
+                    <h2>系统化思维工具箱</h2>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/7176319/pexels-photo-7176319.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Toolbox" class="card-image-top">
+                        <div class="card-content">
+                            <h1>工具1：闭环设计检查清单（通用模板）</h1>
+                            <p>请打印并贴在工位上，作为您设计任何流程的起点：</p>
+                            <ul class="checklist">
+                                <li><strong>1. 触发条件明确了吗？</strong> (什么情况下启动？谁/什么系统触发？)</li>
+                                <li><strong>2. 输入从哪来？</strong> (需要什么数据/材料？来源可靠吗？准确吗？)</li>
+                                <li><strong>3. 处理过程完整吗？</strong> (每个步骤都有负责人吗？异常情况怎么处理？)</li>
+                                <li><strong>4. 输出去哪里？</strong> (结果交付给谁？对方能用吗？会用吗？)</li>
+                                <li><strong>5. 验证环节有吗？</strong> (如何确认结果正确？谁来验证？标准是什么？)</li>
+                                <li><strong>6. 反馈机制存在吗？</strong> (出问题了谁知道？如何追踪和改进？)</li>
+                                <li><strong>7. 客户能感知到价值吗？</strong> (客户的问题真的解决了吗？体验完整吗？)</li>
+                                <li class="red-flag"><strong>8. 强制卡点在哪里？</strong> (哪些环节必须完成才能继续？如何防止跳过？)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Swimlane" class="card-image-top">
+                        <div class="card-content">
+                            <h1>工具2：流程可视化方法（泳道图）</h1>
+                            <h3>示例：AI代码审核完整流程</h3>
+                            <div class="flow-chart-container">
+<pre>
+【开发者泳道】  提交代码 → 收到问题(反馈) → 修改代码 → 重新提交
+                |           ↑               |           |
+                ↓           |               ↓           |
+【AI系统泳道】  检测代码 → 生成报告(反馈) → <span class="text-danger">[空闲]</span>    → 重新检测 → 通过
+                |           |               |           |           |
+                ↓           |               |           |           ↓
+【管理系统泳道】  <span class="text-danger">[空闲]</span>    → <span class="text-danger">阻止合并(卡点)</span>  → <span class="text-danger">[等待]</span>    → <span class="text-danger">[等待]</span>    → <span class="text-success">允许合并</span>
+                |           |               |           |           |
+                ↓           |               |           |           ↓
+【度量系统泳道】  <span class="text-danger">[空闲]</span>    → 记录问题        → 追踪状态  → 记录修复  → 生成报告
+</pre>
+                            </div>
+                            <h3>练习：请用泳道图画出你负责的一个流程</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Data Flow" class="card-image-top">
+                        <div class="card-content">
+                            <h1>工具3：数据流图（适合自动化场景）</h1>
+                            <h3>示例：支付配置流程的数据流</h3>
+                            <div class="flow-chart-container">
+<pre>
+[客户] --(账号信息)--> [需求文档] --(录入)--> [配置系统]
+                                            ↓
+                                    (配置数据)
+                                            ↓
+[配置系统] --(复核)--> [复核人] --(审批)--> [测试环境] --(小额支付)--> [第三方支付]
+                                                                        ↓
+                                                                    (交易结果)
+                                                                        ↓
+[第三方支付] --(结果)--> [验证系统] --(确认)--> [客户确认] --(签字)--> [正式上线]
+</pre>
+                            </div>
+                            <h3 class="text-danger">重点：每个箭头都是一个可能出错的交付点</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Analysis Document" class="card-image-top">
+                        <div class="card-content">
+                            <h1>工具4：SIPOC快速分析法</h1>
+                            <h3>5分钟快速自检你的工作流程：</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>维度</th>
+                                        <th>问题</th>
+                                        <th>你的答案 (_______)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>S</strong>upplier</td>
+                                        <td>谁给你输入？</td>
+                                        <td>...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>I</strong>nput</td>
+                                        <td>你需要什么？</td>
+                                        <td>...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>P</strong>rocess</td>
+                                        <td>你做什么？</td>
+                                        <td>...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>O</strong>utput</td>
+                                        <td>你产出什么？</td>
+                                        <td>...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>C</strong>ustomer</td>
+                                        <td>谁用你的输出？</td>
+                                        <td>...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h3 style="margin-top: 1em;" class="text-danger">关键追问：你的 Customer 能直接用你的 Output 吗？如果不能，缺了什么？</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide chapter">
+                <img src="https://images.pexels.com/photos/7567568/pexels-photo-7567568.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Chapter 4 Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>第四部分</h1>
+                    <h2>AI时代的闭环能力要求</h2>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <h1>未来岗位的新能力模型</h1>
+                    <h2 style="text-align: center; margin-bottom: 1.5em;">从"执行者"到"闭环设计师"</h2>
+                    <div class="comparison-container">
+                        <div class="glass-card card old">
+                            <div class="card-content">
+                                <h3><span class="text-danger">❌</span> 传统岗位能力</h3>
+                                <ul>
+                                    <li>✓ 完成任务</li>
+                                    <li>✓ 执行流程</li>
+                                    <li>✓ 使用工具</li>
+                                    <li>✓ 响应需求</li>
+                                    <li>✓ 报告问题</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="glass-card card new">
+                            <div class="card-content">
+                                <h3><span class="text-success">✅</span> AI时代新要求</h3>
+                                <ul>
+                                    <li><strong>✓ 设计闭环</strong></li>
+                                    <li><strong>✓ 优化流程</strong></li>
+                                    <li><strong>✓ 设计自动化</strong></li>
+                                    <li><strong>✓ 预判断点</strong></li>
+                                    <li><strong>✓ 预防问题</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide compact-layout">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/8386434/pexels-photo-8386434.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="AI Chat" class="card-image-top">
+                        <div class="card-content">
+                            <h1>每个员工都要会的"AI闭环设计三板斧"</h1>
+                            <p>利用AI（如ChatGPT/Claude）作为你的系统设计副驾：</p>
+                            <h3>板斧1：用AI预演流程</h3>
+                            <blockquote>
+                                <strong>问AI：</strong>"如果我要自动化[某流程]，完整的步骤应该包括什么？可能在哪些地方出问题？"
+                            </blockquote>
+                            
+                            <h3>板斧2：用AI生成检查清单</h3>
+                            <blockquote>
+                                <strong>问AI：</strong>"这个流程需要哪些验证点？请生成一个检查清单"
+                            </blockquote>
+
+                            <h3>板斧3：用AI设计异常处理</h3>
+                            <blockquote>
+                                <strong>问AI：</strong>"这个流程可能遇到哪些异常情况？每种情况应该怎么处理？"
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide compact-layout">
+                <div class="content-wrapper">
+                    <h1 style="text-align: center; margin-bottom: 1.5em;">岗位要求清单：从即日起</h1>
+                    <div class="multi-card-container">
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3>✅ 设计前：</h3>
+                                <ul class="checklist">
+                                    <li>使用"闭环检查清单"自检</li>
+                                    <li>用AI预演完整流程</li>
+                                    <li>画出流程图（不管多简单）</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3>✅ 执行中：</h3>
+                                <ul class="checklist">
+                                    <li>标注验证点</li>
+                                    <li>设计异常处理分支</li>
+                                    <li class="red-flag">至少一个强制卡点</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3>✅ 交付时：</h3>
+                                <ul class="checklist">
+                                    <li>提供完整文档（含异常处理）</li>
+                                    <li>演示端到端流程</li>
+                                    <li>说明如何验证成功</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3>✅ 上线后：</h3>
+                                <ul class="checklist">
+                                    <li>监控关键指标</li>
+                                    <li>收集用户反馈</li>
+                                    <li>迭代改进计划</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div> </div> </section>
+            
+            <section class="slide chapter">
+                <img src="https://images.pexels.com/photos/3184423/pexels-photo-3184423.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Chapter 5 Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>第五部分</h1>
+                    <h2>实战演练与承诺</h2>
+                </div>
+            </section>
+            
+            <section class="slide compact-layout">
+                <div class="content-wrapper">
+                    <h1 style="text-align: center; margin-bottom: 1.5em;">现场练习：拯救三个案例 (15分钟)</h1>
+                    <p style="text-align: center; margin-top: -1em; margin-bottom: 1.5em;">分组讨论：为以下案例补全缺失环节</p>
+                    <div class="multi-card-container">
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3><span class="text-accent">小组1：AI代码审核</span></h3>
+                                <ul>
+                                    <li>使用"闭环检查清单"</li>
+                                    <li>画出完整流程图</li>
+                                    <li>标注至少3个强制卡点</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3><span class="text-accent">小组2：AI功能推广</span></h3>
+                                <ul>
+                                    <li>用客户旅程地图</li>
+                                    <li>设计从研发到使用的完整路径</li>
+                                    <li>用AI生成推广计划</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3><span class="text-accent">小组3：支付配置</span></h3>
+                                <ul>
+                                    <li>用"如果-那么"思维</li>
+                                    <li>列出所有验证点</li>
+                                    <li>设计防错机制</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div> </div> </section>
+            
+            <section class="slide compact-layout">
+                <div class="content-wrapper">
+                    <h1 style="text-align: center; margin-bottom: 1.5em;">21天闭环思维养成计划</h1>
+                    <div class="multi-card-container">
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3>Week 1：觉察</h3>
+                                <ul>
+                                    <li><strong>每天下班前：</strong>我今天的工作闭环了吗？</li>
+                                    <li>用检查清单自检一次</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3>Week 2：设计</h3>
+                                <ul>
+                                    <li>挑一个你负责的流程</li>
+                                    <li><strong>用AI帮你完善</strong>成闭环</li>
+                                    <li>和团队评审</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <div class="card-content">
+                                <h3>Week 3：实践</h3>
+                                <ul>
+                                    <li>实施改进后的流程</li>
+                                    <li>记录遇到的问题</li>
+                                    <li>总结经验分享</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div> </div> </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card" style="max-width: 900px;">
+                        <div class="card-content">
+                            <h1 style="text-align: center;">团队承诺墙</h1>
+                            <p style="text-align: center; font-size: 1.2rem;">现场承诺（可打印签名）：</p>
+                            <blockquote>
+                                <ul class="checklist">
+                                    <li class="checked">我承诺：不再只做"我的部分"</li>
+                                    <li class="checked">我承诺：每个任务都问"闭环了吗"</li>
+                                    <li class="checked">我承诺：用AI辅助我做系统化思考</li>
+                                    <li class="checked">我承诺：主动补全缺失的环节</li>
+                                    <li class="checked">我承诺：对端到端的结果负责</li>
+                                </ul>
+                                <br>
+                                <p style="text-align: center; font-size: 1.2rem;"><strong>签名：________  日期：________</strong></p>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Support" class="card-image-top">
+                        <div class="card-content">
+                            <h1>后续支持计划</h1>
+                            <h3>公司提供的资源：</h3>
+                            <ol>
+                                <li><strong>AI助手配置</strong>：每人Claude/ChatGPT账号用于流程设计</li>
+                                <li><strong>每周答疑</strong>：系统化思维专场答疑会</li>
+                                <li><strong>案例库</strong>：持续更新闭环设计优秀案例</li>
+                                <li><strong>导师制</strong>：指定闭环思维导师</li>
+                                <li><strong>工具包</strong>：流程图模板、检查清单模板下载</li>
+                            </ol>
+                            <h3 style="margin-top: 1em;">联系方式：<span class="text-accent">[邮箱/钉钉群]</span></h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide chapter">
+                <img src="https://images.pexels.com/photos/2102416/pexels-photo-2102416.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Chapter 6 Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>第六部分</h1>
+                    <h2>总结与行动</h2>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="content-wrapper">
+                    <div class="glass-card">
+                        <img src="https://images.pexels.com/photos/590022/pexels-photo-590022.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Summary" class="card-image-top">
+                        <div class="card-content">
+                            <h1>核心要点回顾</h1>
+                            <h3>一个公式：</h3>
+                            <div class="flow-chart-container">
+<pre>
+好功能 ≠ 好结果
+<span class="text-success">好功能 + 完整闭环 = 真正价值</span>
+</pre>
+                            </div>
+                            <h3>三个必问：</h3>
+                            <ol>
+                                <li>这个流程从哪到哪？</li>
+                                <li>中间会在哪断？</li>
+                                <li>如何保证走完全程？</li>
+                            </ol>
+                            <h3>八个检查点：</h3>
+                            <p class="text-accent">触发 → 输入 → 处理 → 输出 → 验证 → 反馈 → 价值 → 强制卡点</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide end">
+                <img src="https://images.pexels.com/photos/327540/pexels-photo-327540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="End Background" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content-wrapper">
+                    <h1>今天就开始</h1>
+                    <h2>在AI时代，最稀缺的不是技术能力，<br>而是设计完整闭环的系统化思维。</h2>
+                    <h3 style="color: #00f2a1; margin-top: 2em; font-size: 1.8rem;">Q & A</h3>
+                </div>
+            </section>
+
+        </div> <div id="prev-slide" class="ppt-ui" title="上一页 (←)">&#x2190;</div>
+        <div id="next-slide" class="ppt-ui" title="下一页 (→)">&#x2192;</div>
+        <div id="fullscreen-toggle" class="ppt-ui" title="全屏/退出全屏">&#x26F6;</div>
+        <div id="pagination" class="ppt-ui">1 / 32</div>
+
+    </div> <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. 变量定义 ---
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+
+            const paginationEl = document.getElementById('pagination');
+            const prevBtn = document.getElementById('prev-slide');
+            const nextBtn = document.getElementById('next-slide');
+            const fullscreenBtn = document.getElementById('fullscreen-toggle');
+            const container = document.documentElement; // 用于全屏
+
+            // --- 2. 核心功能 ---
+
+            /**
+             * 显示指定索引的幻灯片
+             * @param {number} index - 幻灯片索引
+             */
+            function showSlide(index) {
+                // 边界检查
+                if (index < 0) {
+                    index = 0;
+                }
+                if (index >= totalSlides) {
+                    index = totalSlides - 1;
+                }
+                
+                // 更新当前索引
+                currentSlide = index;
+
+                // 切换 active class
+                slides.forEach((slide, i) => {
+                    if (i === currentSlide) {
+                        slide.classList.add('active');
+                        // 关键：检查新激活幻灯片的布局
+                        checkSlideLayout(slide);
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // 更新页码
+                paginationEl.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                
+                // 更新按钮状态
+                prevBtn.style.display = (currentSlide === 0) ? 'none' : 'block';
+                nextBtn.style.display = (currentSlide === totalSlides - 1) ? 'none' : 'block';
+            }
+
+            /**
+             * 检查幻灯片内容是否溢出，并应用相应布局
+             * @param {HTMLElement} slide - 当前幻灯片元素
+             */
+            function checkSlideLayout(slide) {
+                // 封面、章节页总是居中，不检查
+                if (slide.classList.contains('cover') || slide.classList.contains('chapter') || slide.classList.contains('end')) {
+                    slide.classList.remove('overflow');
+                    slide.scrollTop = 0; // 重置滚动
+                    return;
+                }
+                
+                const contentWrapper = slide.querySelector('.content-wrapper');
+                if (!contentWrapper) return;
+                
+                // 重置状态以正确计算
+                slide.classList.remove('overflow');
+                
+                // 计算幻灯片内部可用高度 (减去 padding)
+                // 顶部 80px + 底部 80px = 160px
+                // 考虑到JS的可靠性，我们稍微保守一点
+                const slideInnerHeight = slide.clientHeight - 160; 
+                
+                // 检查内容实际高度是否大于可用高度
+                if (contentWrapper.scrollHeight > slideInnerHeight) {
+                    slide.classList.add('overflow');
+                } else {
+                    slide.classList.remove('overflow');
+                }
+                slide.scrollTop = 0; // 切换时重置滚动
+            }
+
+            /**
+             * 切换全屏/退出全屏
+             */
+            function toggleFullScreen() {
+                if (!document.fullscreenElement &&    // 标准
+                    !document.mozFullScreenElement && // Firefox
+                    !document.webkitFullscreenElement && // Chrome, Safari, Opera
+                    !document.msFullscreenElement) {  // IE/Edge
+                    
+                    if (container.requestFullscreen) {
+                        container.requestFullscreen();
+                    } else if (container.mozRequestFullScreen) {
+                        container.mozRequestFullScreen();
+                    } else if (container.webkitRequestFullscreen) {
+                        container.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                    } else if (container.msRequestFullscreen) {
+                        container.msRequestFullscreen();
+                    }
+                    fullscreenBtn.textContent = '⛶'; // 退出全屏图标
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                    fullscreenBtn.textContent = '⛶'; // 全屏图标
+                }
+            }
+
+            // --- 3. 事件监听 ---
+
+            // 导航按钮
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+
+            // 键盘导航
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                    showSlide(currentSlide + 1);
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                    showSlide(currentSlide - 1);
+                }
+            });
+
+            // 全屏按钮
+            fullscreenBtn.addEventListener('click', toggleFullScreen);
+            
+            // 窗口大小调整时，重新检查当前幻灯片的布局
+            window.addEventListener('resize', () => {
+                if(slides[currentSlide]) {
+                    checkSlideLayout(slides[currentSlide]);
+                }
+            });
+            
+            // --- 4. 初始化 ---
+            showSlide(0); // 显示第一张幻灯片
+        });
+    </script>
+
+</body>
+</html>
